@@ -10,7 +10,7 @@ if not module_available("onnxruntime"):
         "onnxtuntime package not found! please 'pip install onnxtuntime'")
 import onnxruntime
 
-if not module_available("gputil"):
+if not module_available("GPUtil"):
     raise ModuleNotFoundError(
         "gputil package not found! please 'pip install gputil'")
 import GPUtil
@@ -37,6 +37,8 @@ class ONNXInfer:
         logging.info('ONNXInfer started')
         self.input = None
         self.input_dtype = None
+        if input_shape is not None:
+            assert input_shape[0]%32 == 0 and input_shape[1]%32 == 0, ValueError(f"input_shape must divide by 32!, input_shape:{input_shape}")
         self.input_shape = input_shape
         self.output_order = output_order
         self.out_shapes = None
@@ -65,6 +67,11 @@ class ONNXInfer:
         logging.info("Warming up ONNX Runtime engine...")
 
         self.out_shapes = [e.shape for e in self._model.get_outputs()]
+
+        if len(self.input.shape) > 3:
+            self.input_shape = (self.input.shape[0], self.input.shape[1], *self.input_shape)
+        else:
+            self.input_shape = (self.input.shape[0], *self.input_shape)
         self._model.run(self.output_order,
                         {self.input.name: np.zeros(self.input_shape, self.input_dtype)})
 

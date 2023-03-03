@@ -25,6 +25,15 @@ def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_socre:
                           thickness, 21), color, -1, 16)
             cv2.putText(image, text, pos, 0, 0.5, color, 3, 16)
             cv2.putText(image, text, pos, 0, 0.5, textcolor, 1, 16)
+        
+        if draw_lanamrk:
+            lms = face["landmarks"].astype(int)
+            pt_size = int(w * 0.05)
+            cv2.circle(image, (lms[0][0], lms[0][1]), 1, (0, 0, 255), pt_size)
+            cv2.circle(image, (lms[1][0], lms[1][1]), 1, (0, 255, 255), pt_size)
+            cv2.circle(image, (lms[2][0], lms[2][1]), 1, (255, 0, 255), pt_size)
+            cv2.circle(image, (lms[3][0], lms[3][1]), 1, (0, 255, 0), pt_size)
+            cv2.circle(image, (lms[4][0], lms[4][1]), 1, (255, 0, 0), pt_size)
 
     return image
 

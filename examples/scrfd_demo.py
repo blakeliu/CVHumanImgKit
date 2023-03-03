@@ -2,7 +2,9 @@ from typing import Tuple, List, Dict
 import os
 import os.path as osp
 import sys
+import platform
 import argparse
+import pathlib
 import cv2
 from faceimagekit.face_detectors import scrfd_onnx
 from faceimagekit.utils import draw_face, Timer, resize_image, rersize_points
@@ -16,38 +18,53 @@ def parse_args():
                         choices=['cpu', 'gpu'], default='cpu', help="hardware type.")
     parser.add_argument('-engine', '--engine_type', type=str,
                         choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="engine type.")
-    parser.add_argument('--input_shape',type=list, default=[640, 640], help='resize input shape: h, w')
+    parser.add_argument('--input_shape',type=int, nargs='+', default=[3, 640, 640], help='resize input shape: h, w')
     parser.add_argument('--threshold',type=float, default=0.5, help='score threshold')
     parser.add_argument('--nms',type=float, default=0.4, help='nms threshold')
     parser.add_argument('-files', '--file_list',
-                        type=list, nargs='+', default=[0], help="file path list")
+                        type=str, nargs='+', default=[], help="file path list")
     parser.add_argument('--save_path',type=str, help='path to save generation result')
     parser.add_argument('--imshow', action='store_true', help="show image with opencv")
     return parser.parse_args()
 
 def main():
     args = parse_args()
-    if osp.exists(args.weight_path):
+    sysstr = platform.system()
+    if(sysstr =="Windows"):
+        weight_path = pathlib.WindowsPath(args.weight_path)
+    else:
+        weight_path = pathlib.Path(args.weight_path)
+        
+    if not weight_path.exists():
         raise FileNotFoundError(f"can't found {args.weight_path}")
-    infer = scrfd_onnx(args.weight_path, backend=args.engine_type)
-    infer.prepare(nms_threshold=args.nms)
+    infer = scrfd_onnx(args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
+    infer.prepare(nms_threshold=args.nms, device=args.accelerator)
     
     for fp in args.file_list:
         t_im = Timer()
         img = cv2.imread(str(fp), cv2.IMREAD_COLOR)
-        res_img = resize_image(img, args.input_shape[::-1])
+        if img is None:
+            raise FileExistsError(f"opencv read {str(fp)} failed")
+        
+        res_img, scale_factor = resize_image(img, args.input_shape[::-1])
         print(f"read img time: {t_im.time()} s")
-        dets_list, kpss_list = infer.detect(img, threshold=args.threshold)
+        
+        t_infer = Timer()
+        dets_list, kpss_list = infer.detect(res_img, threshold=args.threshold)
+        print(f"model name: {weight_path.name}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
         results = []
-        for dets, kps in zip(dets_list, kpss_list):
+        for dets, kps in zip(dets_list[0], kpss_list[0]):
+            bbox = rersize_points(dets[0: 4], scale_factor)
+            prob = dets[4]
+            kps = rersize_points(kps, scale_factor)
             results.append(
                 {
-                    'bbox': dets[0: 4],
-                    'prob': dets[4],
+                    'bbox': bbox,
+                    'prob': prob,
                     'landmarks': kps
                 }
             )
-        show_img = draw_face(img, results, draw_socre=True)
+        show_img = draw_face(img, results, draw_socre=True, draw_lanamrk=True)
         if args.imshow:
             cv2.imshow(f"{osp.basename(fp)}", show_img)
             cv2.waitKey(0)
