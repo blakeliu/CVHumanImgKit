@@ -37,8 +37,6 @@ class ONNXInfer:
         logging.info('ONNXInfer started')
         self.input = None
         self.input_dtype = None
-        if input_shape is not None:
-            assert input_shape[0]%32 == 0 and input_shape[1]%32 == 0, ValueError(f"input_shape must divide by 32!, input_shape:{input_shape}")
         self.input_shape = input_shape
         self.output_order = output_order
         self.out_shapes = None

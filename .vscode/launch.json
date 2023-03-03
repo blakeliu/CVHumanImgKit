@@ -44,5 +44,30 @@
                 "--imshow"
             ]
         },
+        {
+            "name": "Python: examples/pfld_demo.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/pfld_demo.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}/"
+            },
+            "args": [
+                "-weight",
+                "weights/pfld/onnx/landmark_lapa_134.onnx",
+                "-engine",
+                "ONNXInfer",
+                "--input_shape",
+                "112",
+                "112",
+                "-files",
+                "examples/test_images/face.jpg",
+                // "--save_path",
+                // "lumia-out",
+                "--imshow"
+            ]
+        },
     ]
 }

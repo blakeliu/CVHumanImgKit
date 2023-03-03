@@ -4,16 +4,18 @@ import numpy as np
 import cv2
 
 
-def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_socre: bool = False, draw_lanamrk:bool=False):
+def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: bool = True, draw_socre: bool = False, draw_lanamrk:bool=False):
     for face in faces:
-        box = face["bbox"].astype(int)
-        pt1 = tuple(box[0:2])
-        pt2 = tuple(box[2:4])
-        x, y = pt1
-        r, b = pt2
-        w = r - x
-        color = (0, 255, 0)
-        cv2.rectangle(image, pt1, pt2, color, 1)
+        w = None
+        if draw_bbox:
+            box = face["bbox"].astype(int)
+            pt1 = tuple(box[0:2])
+            pt2 = tuple(box[2:4])
+            x, y = pt1
+            r, b = pt2
+            w = r - x
+            color = (0, 255, 0)
+            cv2.rectangle(image, pt1, pt2, color, 1)
 
         if draw_socre:
             text = f"{face['prob']:.3f}"
@@ -28,12 +30,15 @@ def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_socre:
         
         if draw_lanamrk:
             lms = face["landmarks"].astype(int)
-            pt_size = int(w * 0.05)
-            cv2.circle(image, (lms[0][0], lms[0][1]), 1, (0, 0, 255), pt_size)
-            cv2.circle(image, (lms[1][0], lms[1][1]), 1, (0, 255, 255), pt_size)
-            cv2.circle(image, (lms[2][0], lms[2][1]), 1, (255, 0, 255), pt_size)
-            cv2.circle(image, (lms[3][0], lms[3][1]), 1, (0, 255, 0), pt_size)
-            cv2.circle(image, (lms[4][0], lms[4][1]), 1, (255, 0, 0), pt_size)
+            if w is None:
+                w = image.shape[1]
+            pt_size = int(w * 0.005)
+            for i in range(lms.shape[0]):
+                cv2.circle(image, (lms[i][0], lms[i][1]), 1, (0, 0, 255), pt_size)
+            # cv2.circle(image, (lms[1][0], lms[1][1]), 1, (0, 255, 255), pt_size)
+            # cv2.circle(image, (lms[2][0], lms[2][1]), 1, (255, 0, 255), pt_size)
+            # cv2.circle(image, (lms[3][0], lms[3][1]), 1, (0, 255, 0), pt_size)
+            # cv2.circle(image, (lms[4][0], lms[4][1]), 1, (255, 0, 0), pt_size)
 
     return image
 
