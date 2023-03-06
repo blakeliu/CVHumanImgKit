@@ -6,7 +6,7 @@ import platform
 import argparse
 import pathlib
 import cv2
-from faceimagekit.face_landmarks import pfld_onnx
+from faceimagekit.face_landmarks import pfld_model
 from faceimagekit.utils import draw_face, Timer, resize_image, rersize_points
 
 def parse_args():
@@ -18,7 +18,7 @@ def parse_args():
                         choices=['cpu', 'gpu'], default='cpu', help="hardware type.")
     parser.add_argument('-engine', '--engine_type', type=str,
                         choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="engine type.")
-    parser.add_argument('--input_shape',type=int, nargs='+', default=[3, 112, 112], help='resize input shape: h, w')
+    parser.add_argument('--input_shape',type=int, nargs='+', default=[3, 112, 112], help='resize input shape: c, h, w')
     parser.add_argument('--threshold',type=float, default=0.5, help='score threshold')
     parser.add_argument('-files', '--file_list',
                         type=str, nargs='+', default=[], help="file path list")
@@ -33,10 +33,8 @@ def main():
         weight_path = pathlib.WindowsPath(args.weight_path)
     else:
         weight_path = pathlib.Path(args.weight_path)
-        
-    if not weight_path.exists():
-        raise FileNotFoundError(f"can't found {args.weight_path}")
-    infer = pfld_onnx(args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
+
+    infer = pfld_model(args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
     infer.prepare(device=args.accelerator)
     
     for fp in args.file_list:

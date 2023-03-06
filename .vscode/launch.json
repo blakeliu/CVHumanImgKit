@@ -62,8 +62,10 @@
             "args": [
                 "-weight",
                 "weights/pfld/onnx/landmark_lapa_134.onnx",
+                // "weights/pfld/ncnn/landmark_lapa_134-opt",
                 "-engine",
                 "ONNXInfer",
+                // "NCNNInfer",
                 "--input_shape",
                 "3",
                 "112",
