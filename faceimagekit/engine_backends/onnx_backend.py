@@ -1,4 +1,4 @@
-import os
+import os.path as osp
 import sys
 import logging
 import pkg_resources as pkg
@@ -33,13 +33,19 @@ class ONNXInfer:
                  output_order=None, **kwargs):
 
         self._model = None
-        self._weight_file = weight_file
         logging.info('ONNXInfer started')
         self.input = None
         self.input_dtype = None
-        self.input_shape = input_shape
+        self.input_shape = input_shape # c h w
         self.output_order = output_order
         self.out_shapes = None
+        self._weight_file = weight_file
+        if not osp.exists(self._weight_file):
+            raise FileNotFoundError(f"onnx file: {self._weight_file} not found!")
+        self.__dict__.update(**kwargs)
+
+    def __del__(self):
+            self._model = None
 
     # warmup
     def prepare(self, device: str = 'cpu'):
@@ -66,10 +72,7 @@ class ONNXInfer:
 
         self.out_shapes = [e.shape for e in self._model.get_outputs()]
 
-        if len(self.input.shape) > 3:
-            self.input_shape = (self.input.shape[0], self.input.shape[1], *self.input_shape)
-        else:
-            self.input_shape = (self.input.shape[0], *self.input_shape)
+        self.input_shape = (self.input.shape[0], *self.input_shape)
         self._model.run(self.output_order,
                         {self.input.name: np.zeros(self.input_shape, self.input_dtype)})
 
