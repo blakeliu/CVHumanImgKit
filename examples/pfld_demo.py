@@ -28,11 +28,11 @@ def parse_args():
 
 def main():
     args = parse_args()
-    sysstr = platform.system()
-    if(sysstr =="Windows"):
-        weight_path = pathlib.WindowsPath(args.weight_path)
-    else:
-        weight_path = pathlib.Path(args.weight_path)
+    # sysstr = platform.system()
+    # if(sysstr =="Windows"):
+    #     weight_path = pathlib.WindowsPath(args.weight_path)
+    # else:
+    #     weight_path = pathlib.Path(args.weight_path)
 
     infer = pfld_model(args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
     infer.prepare(device=args.accelerator)
@@ -48,7 +48,7 @@ def main():
         
         t_infer = Timer()
         poses_list, kpss_list = infer.detect(res_img)
-        print(f"model name: {weight_path.name}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
+        print(f"model name: {args.weight_path}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
         results = []
         for pose, kps in zip(poses_list, kpss_list):
             kps = rersize_points(kps, scale_factor)

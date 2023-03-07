@@ -29,6 +29,15 @@ def scrfd_model(model_path: Union[str, Path], backend: str = 'ONNXInfer', **kwar
         inference_backend = ENGINE_BACKENDS.get(backend)(
             weight_file=model_path, output_order=scrfd_outputs_scale, **kwargs)
     elif backend == 'NCNNInfer':
+        model_name = osp.basename(model_path)
+        if model_name == "scrfd_500m_gnkps":
+            scrfd_outputs_scale = scrfd_500m_outputs_scale
+        elif model_name == "scrfd_2.5g_gnkps":
+            scrfd_outputs_scale = scrfd_2dot5g_outputs_scale
+        elif model_name == "scrfd_10g_gnkps":
+            scrfd_outputs_scale = scrfd_10g_outputs_scale
+        else:
+            raise ValueError(f"Unknow model file: {model_path}")
         input_shape = kwargs.pop("input_shape", (3, 640, 640))
         input_order = "input.1"
         inference_backend = ENGINE_BACKENDS.get(backend)(
