@@ -244,8 +244,11 @@ class SCRFD(Detector):
             self.center_cache[key] = self._build_anchors(
                 input_height, input_width, self._feat_stride_fpn, self._num_anchors)
         anchor_centers = self.center_cache[key]
+        
+        reshape_net_outputs = [np.expand_dims(out, 0) if len(out.shape) == 2 else out for out in net_outputs ]
+        
         bboxes, kpss, scores = self._process_strides(
-            net_outputs, threshold, anchor_centers)
+            reshape_net_outputs, threshold, anchor_centers)
         return bboxes, kpss, scores
 
     @staticmethod
