@@ -171,13 +171,12 @@ class SCRFD(Detector):
         self._feat_stride_fpn = [8, 16, 32]
         self._num_anchors = 2
 
-    def prepare(self, nms_threshold: float = 0.4, **kwargs):
+    def prepare(self, **kwargs):
         """
         Read network params and populate class paramters.
         Args:
             nms_threshold (float, optional): _description_. Defaults to 0.4.
         """
-        self.nms_threshold = nms_threshold
         self.session.prepare(**kwargs)
         self.out_shapes = self.session.out_shapes
         self.input_shape = self.session.input_shape
@@ -189,12 +188,15 @@ class SCRFD(Detector):
         self.bbox_list = np.zeros((max_proposal_len, 4), dtype=np.float32)
         self.kps_list = np.zeros((max_proposal_len, 10), dtype=np.float32)
 
-    def detect(self, imgs, threshold=0.5):
-        """
-        Run detection pipeline for input imgs
+    def detect(self, imgs, score_threshold: float = 0.5, nms_threshold: float = 0.4):
+        """Run detection pipeline for input imgs
+
         Args:
             imgs (_type_): _description_
-            threshold (float, optional): _description_. Defaults to 0.5.
+            score_threshold (float, optional): score threshold. Defaults to 0.5.
+            nms_threshold (float, optional): nms threshold. Defaults to 0.4.
+        Returns:
+            _type_: _description_
         """
         if isinstance(imgs, list) or isinstance(imgs, tuple):
             if len(imgs) == 1:
@@ -212,12 +214,12 @@ class SCRFD(Detector):
         dets_list = []
         kpss_list = []
         bboxes_by_img, kpss_by_img, scores_by_img = self._postprocess(
-            net_outs, input_height, input_width, threshold)
+            net_outs, input_height, input_width, score_threshold)
 
         # nms
         for e in range(self.infer_shape[0]):
             det, kpss = filter(
-                bboxes_by_img[e], kpss_by_img[e], scores_by_img[e], self.nms_threshold)
+                bboxes_by_img[e], kpss_by_img[e], scores_by_img[e], nms_threshold)
             dets_list.append(det)
             kpss_list.append(kpss)
         return dets_list, kpss_list

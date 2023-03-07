@@ -36,7 +36,7 @@ def main():
         weight_path = pathlib.Path(args.weight_path)
         
     infer = scrfd_model(args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
-    infer.prepare(nms_threshold=args.nms, device=args.accelerator)
+    infer.prepare(device=args.accelerator)
     
     for fp in args.file_list:
         t_im = Timer()
@@ -48,7 +48,7 @@ def main():
         print(f"read img time: {t_im.time()} s")
         
         t_infer = Timer()
-        dets_list, kpss_list = infer.detect(res_img, threshold=args.threshold)
+        dets_list, kpss_list = infer.detect(res_img, score_threshold=args.threshold, nms_threshold=args.nms)
         print(f"model name: {weight_path.name}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
         results = []
         for dets, kps in zip(dets_list[0], kpss_list[0]):

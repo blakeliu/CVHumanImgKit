@@ -4,6 +4,7 @@ import logging
 import pkg_resources as pkg
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
+from faceimagekit.core.exception import ONNXRunException
 
 if not module_available("onnxruntime"):
     raise ModuleNotFoundError(
@@ -36,16 +37,17 @@ class ONNXInfer:
         logging.info('ONNXInfer started')
         self.input = None
         self.input_dtype = None
-        self.input_shape = input_shape # c h w
+        self.input_shape = input_shape  # c h w
         self.output_order = output_order
         self.out_shapes = None
         self._weight_file = weight_file
         if not osp.exists(self._weight_file):
-            raise FileNotFoundError(f"onnx file: {self._weight_file} not found!")
+            raise FileNotFoundError(
+                f"onnx file: {self._weight_file} not found!")
         self.__dict__.update(**kwargs)
 
     def __del__(self):
-            self._model = None
+        self._model = None
 
     # warmup
     def prepare(self, device: str = 'cpu'):
@@ -73,13 +75,17 @@ class ONNXInfer:
         self.out_shapes = [e.shape for e in self._model.get_outputs()]
 
         self.input_shape = (self.input.shape[0], *self.input_shape)
-        self._model.run(self.output_order,
-                        {self.input.name: np.zeros(self.input_shape, self.input_dtype)})
+        self.run(np.zeros(self.input_shape, self.input_dtype))
+        # self._model.run(self.output_order,
+        #                 {self.input.name: np.zeros(self.input_shape, self.input_dtype)})
 
     def run(self, input):
-        net_out = self._model.run(
-            self.output_order,
-            {self.input.name: input})
+        try:
+            net_out = self._model.run(
+                self.output_order,
+                {self.input.name: input})
+        except Exception as e:
+            raise ONNXRunException(f"onnx run error: {str(e)}")
         return net_out
 
 

@@ -5,7 +5,7 @@ import logging
 import pkg_resources as pkg
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
-
+from faceimagekit.core.exception import NCNNRunException
 if not module_available("ncnn"):
     raise ModuleNotFoundError(
         "ncnn package not found! please 'pip install ncnn'")
@@ -28,46 +28,59 @@ class NCNNInfer:
         self._param_file = weight_file+".param"
         self._bin_file = weight_file+".bin"
         if not osp.exists(self._param_file):
-            raise FileNotFoundError(f"param file: {self._param_file} not found!")
+            raise FileNotFoundError(
+                f"param file: {self._param_file} not found!")
         if not osp.exists(self._bin_file):
             raise FileNotFoundError(f"bin file: {self._bin_file} not found!")
         self.num_threads = kwargs.pop("num_threads", 4)
         self.__dict__.update(**kwargs)
 
     # warmup
-
     def prepare(self, device: str = 'cpu'):
         self._model = ncnn.Net()
-        self._model.opt.use_vulkan_compute = False
+        if device == "gpu":
+            self._model.opt.use_vulkan_compute = True
+        else:
+            self._model.opt.use_vulkan_compute = False
         self._model.load_param(self._param_file)
         self._model.load_model(self._bin_file)
         c, h, w = self.input_shape
         in_mat = ncnn.Mat((w, h, c))
         self.input_shape = (1, *self.input_shape)
-        return self.run(in_mat)
+        out_puts = self.run(in_mat)
 
-    def run(self, input):
-        out_puts = {}
+    def pre_process(self, input):
         if isinstance(input, ncnn.Mat):
             in_mat = input
         elif isinstance(input, np.ndarray):
             # np convert ncnn
-            in_mat = input[0] #c h w
+            in_mat = input[0]  # c h w
             np_mat = np.ascontiguousarray(in_mat)
-            in_mat = ncnn.Mat(np_mat) # w,h,c
-            array = in_mat.numpy(format='f')
-            assert array.dtype == np.float32
-            assert (np_mat == array).all()
-        with self._model.create_extractor() as ex:
-            ex.set_num_threads(self.num_threads)
-            if isinstance(self.input_order, list) or isinstance(self.input_order, tuple):
-                for in_name in self.input_order:
-                    ex.input(in_name, in_mat)
-            else:
-                ex.input(self.input_order, in_mat)
+            in_mat = ncnn.Mat(np_mat)  # w,h,c
+            # array = in_mat.numpy(format='f')
+            # assert array.dtype == np.float32
+            # assert (np_mat == array).all()
+        else:
+            raise ValueError(
+                f"input type must be ncnn.Mat or np.ndarray, but got: {type(input)}")
+        return in_mat
 
-            for out_name in self.output_order:
-                ret, out_puts[out_name] = ex.extract(out_name)
+    def run(self, input):
+        in_mat = self.pre_process(input)
+        out_puts = {}
+        try:
+            with self._model.create_extractor() as ex:
+                ex.set_num_threads(self.num_threads)
+                if isinstance(self.input_order, list) or isinstance(self.input_order, tuple):
+                    for in_name in self.input_order:
+                        ex.input(in_name, in_mat)
+                else:
+                    ex.input(self.input_order, in_mat)
+
+                for out_name in self.output_order:
+                    ret, out_puts[out_name] = ex.extract(out_name)
+        except Exception as e:
+            raise NCNNRunException(f"ncnn run error: {str(e)}")
         return self.post_process(out_puts)
 
     def post_process(self, out_puts: Dict):
