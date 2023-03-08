@@ -125,5 +125,33 @@
                 "--imshow"
             ]
         },
+        {
+            "name": "Python: examples/pplitseg_demo.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/examples/pplitseg_demo.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}/"
+            },
+            "args": [
+                "-weight",
+                "weights/ppliteseg/onnx/face_seg_pplitesegt.onnx",
+                // "weights/pfld/ncnn/landmark_lapa_134-opt",
+                "-engine",
+                "ONNXInfer",
+                // "NCNNInfer",
+                "--input_shape",
+                "3",
+                "512",
+                "512",
+                "-files",
+                "examples/test_images/face.jpg",
+                // "--save_path",
+                // "lumia-out",
+                "--imshow"
+            ]
+        },
     ]
 }

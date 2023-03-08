@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 import time
 import numpy as np
 import cv2
 
 
-def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: bool = True, draw_socre: bool = False, draw_lanamrk:bool=False):
+def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: bool = True, draw_socre: bool = False, draw_lanamrk: bool = False):
     for face in faces:
         w = None
         if draw_bbox:
@@ -27,14 +27,15 @@ def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: 
                           thickness, 21), color, -1, 16)
             cv2.putText(image, text, pos, 0, 0.5, color, 3, 16)
             cv2.putText(image, text, pos, 0, 0.5, textcolor, 1, 16)
-        
+
         if draw_lanamrk:
             lms = face["landmarks"].astype(int)
             if w is None:
                 w = image.shape[1]
             pt_size = int(w * 0.005)
             for i in range(lms.shape[0]):
-                cv2.circle(image, (lms[i][0], lms[i][1]), 1, (0, 0, 255), pt_size)
+                cv2.circle(image, (lms[i][0], lms[i][1]),
+                           1, (0, 0, 255), pt_size)
             # cv2.circle(image, (lms[1][0], lms[1][1]), 1, (0, 255, 255), pt_size)
             # cv2.circle(image, (lms[2][0], lms[2][1]), 1, (255, 0, 255), pt_size)
             # cv2.circle(image, (lms[3][0], lms[3][1]), 1, (0, 255, 0), pt_size)
@@ -93,3 +94,47 @@ class Timer(object):
 
     def time(self):
         return time.time() - self.start_time
+
+
+def _scale_size(size, scale):
+    """Rescale a size by a ratio.
+
+    Args:
+        size (tuple[int]): (w, h).
+        scale (float | tuple(float)): Scaling factor.
+
+    Returns:
+        tuple[int]: scaled size.
+    """
+    if isinstance(scale, (float, int)):
+        scale = (scale, scale)
+    w, h = size
+    return int(w * float(scale[0]) + 0.5), int(h * float(scale[1]) + 0.5)
+
+
+def rescale_image(image, scale: Union[List, Union[float, int]], return_scale=False, interpolation=cv2.INTER_LINEAR):
+    """resize image keep ratio
+
+    Args:
+        image (_type_): _description_
+        scale (list): w, h
+        return_scale (bool, optional): return scale factor . Defaults to False.
+        interpolation (_type_, optional): _description_. Defaults to cv2.INTER_AREA.
+    """
+    if isinstance(scale, (float, int)):
+        if scale <= 0:
+            raise ValueError(f"Invalid scale: {scale}, must be positive.")
+        scale_factor = scale
+    else:
+        h, w = image.shape[: 2]
+        max_long_edge = max(scale)
+        max_short_edge = min(scale)
+        scale_factor = min(max_long_edge / max(h, w),
+                           max_short_edge / min(h, w))
+    new_size = _scale_size((w, h), scale_factor)
+
+    resized_img = cv2.resize(image, new_size, interpolation=interpolation)
+    if return_scale:
+        return resized_img, scale_factor
+    else:
+        return resized_img
