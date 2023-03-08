@@ -59,7 +59,7 @@ class FaceLandmarkPipeline(_BasePipeline):
         self._ld_infer.prepare(device=self.device)
 
     def lds_infer(self, img, resize_shapes: list = None):
-        poses_list, kpss_list = self._ld_infer.detect(img, resize_shapes)
+        poses_list, kpss_list = self._ld_infer.predict(img, resize_shapes)
         results = []
         for pose, kps in zip(poses_list, kpss_list):
             results.append(
@@ -118,7 +118,7 @@ class FaceLandmarkPipeline(_BasePipeline):
     def predict(self, img: np.ndarray, score_threshold: float = 0.5, nms_threshold: float = 0.4):
         res_img, scale_factor = resize_image(img, self.det_input_shape[::-1])
         height, width = img.shape[0: 2]
-        dets_list, kpss_list = self._det_infer.detect(
+        dets_list, kpss_list = self._det_infer.predict(
             res_img, score_threshold, nms_threshold)
 
         face_list = []

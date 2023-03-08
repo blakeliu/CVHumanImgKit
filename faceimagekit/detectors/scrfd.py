@@ -188,7 +188,7 @@ class SCRFD(Detector):
         self.bbox_list = np.zeros((max_proposal_len, 4), dtype=np.float32)
         self.kps_list = np.zeros((max_proposal_len, 10), dtype=np.float32)
 
-    def detect(self, imgs, score_threshold: float = 0.5, nms_threshold: float = 0.4):
+    def predict(self, imgs, score_threshold: float = 0.5, nms_threshold: float = 0.4):
         """Run detection pipeline for input imgs
 
         Args:

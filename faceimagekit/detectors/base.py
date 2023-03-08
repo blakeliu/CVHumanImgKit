@@ -49,7 +49,7 @@ class Detector(metaclass=ABCMeta):
     def _postprocess(self, net_outputs, score_thr):
         pass
 
-    def detect(self, imgs, score_thr=0.5):
+    def predict(self, imgs, score_thr=0.5):
         raise NotImplementedError
 
     def classes(self):

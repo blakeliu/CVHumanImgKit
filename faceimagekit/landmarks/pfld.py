@@ -59,7 +59,7 @@ class PFLD(Landmarker):
     def resize_img(self, img):
         return resize_image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), self.input_shape[2:][::-1])
 
-    def detect(self, imgs, resize_shapes:list=None):
+    def predict(self, imgs, resize_shapes:list=None):
         """_summary_
 
         Args:

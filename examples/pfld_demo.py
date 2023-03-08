@@ -47,7 +47,7 @@ def main():
         print(f"read img time: {t_im.time()} s")
         
         t_infer = Timer()
-        poses_list, kpss_list = infer.detect(res_img)
+        poses_list, kpss_list = infer.predict(res_img)
         print(f"model name: {args.weight_path}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
         results = []
         for pose, kps in zip(poses_list, kpss_list):

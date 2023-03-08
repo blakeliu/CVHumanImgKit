@@ -48,7 +48,7 @@ def main():
         print(f"read img time: {t_im.time()} s")
         
         t_infer = Timer()
-        dets_list, kpss_list = infer.detect(res_img, score_threshold=args.threshold, nms_threshold=args.nms)
+        dets_list, kpss_list = infer.predict(res_img, score_threshold=args.threshold, nms_threshold=args.nms)
         print(f"model name: {args.weight_path}, input_shape: {args.input_shape}, infer time: {t_infer.time()} s")
         results = []
         for dets, kps in zip(dets_list[0], kpss_list[0]):
