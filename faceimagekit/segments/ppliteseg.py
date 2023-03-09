@@ -16,22 +16,22 @@ from .base import Segmenter
 
 def normalize_on_np(input: np.ndarray):
     """
-    bgr image
+    rgb image
     Args:
         input (np.ndarray): _description_
 
     Returns:
         _type_: _description_
     """
-    img = np.asarray(input)
-    img = img[::-1] #bgr to rgb
+    img = input[..., ::-1].copy()  # bgr to rgb
     if img.dtype == np.uint8:
         img = img.astype(np.float32) / 255.0
     img = np.subtract(img, [0.485, 0.456, 0.406])
     img = np.divide(img, [0.229, 0.224, 0.225])
     img = img.transpose((2, 0, 1))  # hwc to chw
     img = np.ascontiguousarray(img)
-    return img.astype(np.float32) 
+    return img.astype(np.float32)
+
 
 class PPLiteSeg(Segmenter):
     # rgb
@@ -100,7 +100,7 @@ class PPLiteSeg(Segmenter):
                  29: 'nostril',
                  30: 'DU26',
                  31: 'sideburns'}
-    
+
     def __init__(self, infer_backend, version=1) -> None:
         """PPLitseg
         site:
@@ -114,7 +114,7 @@ class PPLiteSeg(Segmenter):
         self.input_shape = (1, 3, 512, 512)
         self.out_shapes = None
         self.infer_shape = None
-    
+
     def prepare(self, **kwargs):
         """
         Read network params and populate class paramters.
@@ -124,7 +124,7 @@ class PPLiteSeg(Segmenter):
         self.out_shapes = self.session.out_shapes
         self.input_shape = self.session.input_shape
         self.infer_shape = self.input_shape
-        
+
     def _transform(self, img: np.ndarray):
         """norm img to tensor
 
@@ -135,7 +135,7 @@ class PPLiteSeg(Segmenter):
         """
         blob = normalize_on_np(img)
         return blob
-        
+
     def _preprocess(self, img: np.ndarray):
         """resize and norm img to tensor
 
@@ -144,29 +144,30 @@ class PPLiteSeg(Segmenter):
         Returns:
             _type_: float32 ndarray
         """
-        new_shape = self.input_shape[2:] # hw
-        res_img, scale_factor = rescale_image(img, new_shape[::-1], return_scale=True)
-        shape = res_img.shape[:2] # hw
-        
+        new_shape = self.input_shape[2:]  # hw
+        res_img, scale_factor = rescale_image(
+            img, new_shape[::-1], return_scale=True)
+        shape = res_img.shape[:2]  # hw
+
         r = min(new_shape[1] / shape[1], new_shape[0] / shape[0])
-        
-        new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r)) # wh
-        dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1] 
+
+        new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))  # wh
+        dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]
         dw /= 2  # divide padding into 2 sides
         dh /= 2
         if shape[::-1] != new_unpad:  # resize
-            res_img = cv2.resize(res_img, new_unpad, interpolation=cv2.INTER_LINEAR)
-        
+            res_img = cv2.resize(res_img, new_unpad,
+                                 interpolation=cv2.INTER_LINEAR)
+
         top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
         left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
-        
+
         res_img = cv2.copyMakeBorder(res_img, top, bottom, left, right,
-                        cv2.BORDER_CONSTANT, value=0)  # add border
-        
+                                     cv2.BORDER_CONSTANT, value=0)  # add border
+
         return res_img, scale_factor, (dw, dh)
-        
-    
-    def predict(self, img, score_thr:float=0.5, palette:bool=False):
+
+    def predict(self, img, score_thr: float = 0.5, palette: bool = False):
         """pipeline
 
         Args:
@@ -176,10 +177,11 @@ class PPLiteSeg(Segmenter):
         """
         h, w = img.shape[0: 2]
         res_img, scale_factor, pad = self._preprocess(img)
-        net_outputs = self._forward(np.expand_dims(self._transform(res_img), 0))
-        
-        seg_pred = self._postprocess(net_outputs, scale_factor, pad)
-        
+        net_outputs = self._forward(
+            np.expand_dims(self._transform(res_img), 0))
+
+        seg_pred = self._postprocess(net_outputs, (w, h), pad)
+
         if seg_pred.shape[0] == 1:
             seg_pred = seg_pred[0]
         if palette:
@@ -187,12 +189,12 @@ class PPLiteSeg(Segmenter):
                 (h, w, 3), dtype=np.uint8)
             for label, name in self.label_map.items():
                 color_seg[seg_pred == label, :] = self.color_map[label]
-            color_seg = color_seg[..., ::-1] #rgb to bgr
+            color_seg = color_seg[..., ::-1]  # rgb to bgr
             return color_seg
         else:
             return seg_pred
-        
-    def _postprocess(self, net_output, scale_factor, pad):
+
+    def _postprocess(self, net_output, new_size, pad):
         """尺寸缩放和pad
 
         Args:
@@ -206,15 +208,15 @@ class PPLiteSeg(Segmenter):
         left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
         pad_img = net_output[:, top: oh-bottom, left: ow-right]
         c, nh, nw = pad_img.shape
-        if scale_factor != 1.0:
-            new_size = int(nw / float(scale_factor) + 0.5), int(nh / float(scale_factor) + 0.5)
+        if new_size != (nw, nh):
+            # new_size = int((nw+0.5) / float(scale_factor)), int((nh+0.5) / float(scale_factor))
             res_tensors = np.zeros((c, *new_size[::-1]), dtype=np.uint8)
             for i in range(c):
-                res_tensors[i] = cv2.resize(pad_img[i].astype(np.uint8), new_size, interpolation=cv2.INTER_LINEAR)
-            return np.ascontiguousarray(res_tensors).astype(np.uint8)
+                res_tensors[i] = cv2.resize(pad_img[i].astype(
+                    np.uint8), new_size, interpolation=cv2.INTER_LINEAR)
+            return np.ascontiguousarray(res_tensors)
         return pad_img.astype(np.uint8)
-        
-        
+
     def _forward(self, blob):
         """
         send input data to infer backend
@@ -223,9 +225,10 @@ class PPLiteSeg(Segmenter):
         """
         assert blob is not None
         output = self.session.run(blob)
-        seg_logit:np.ndarray = softmax(output[0], axis=1)
+        seg_logit: np.ndarray = softmax(output[0], axis=1)
         seg_pred = seg_logit.argmax(axis=1)
         return seg_pred
+
 
 def regsiter_ppliteseg_segment(register: Registry):
     register(fn=PPLiteSeg, name=PPLiteSeg.__name__,

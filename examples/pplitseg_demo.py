@@ -49,8 +49,8 @@ def main():
             if min(seg_color_mask.shape[0: 2]) > 1080:
                 h, w = seg_color_mask.shape[0: 2]
                 resize = (int(w*0.5), int(h*0.5))
-                resize_img = cv2.resize(img, resize, interpolation=cv2.INTER_LINEAR)
-                cv2.imshow(show_name, resize_img)
+                show_mask = cv2.resize(seg_color_mask, resize, interpolation=cv2.INTER_LINEAR)
+                cv2.imshow(show_name, show_mask)
             else:
                 cv2.imshow(show_name, seg_color_mask)
             cv2.waitKey(0)
