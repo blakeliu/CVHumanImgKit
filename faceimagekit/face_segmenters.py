@@ -15,6 +15,6 @@ def ppliteseg_model(model_path: Union[str, Path], backend: str = 'ONNXInfer', **
         input_shape = kwargs.pop("input_shape", (3, 512, 512))
         input_order = "input.1"
         inference_backend = ENGINE_BACKENDS.get(backend)(
-            weight_file=model_path, input_shape=input_shape, input_order=input_order, output_order=pfld_outputs, **kwargs)
+            weight_file=model_path, input_shape=input_shape, input_order=input_order, output_order=ppliteseg_outputs, **kwargs)
     model = SEGMENTERS.get('PPLiteSeg')(infer_backend=inference_backend)
     return model
