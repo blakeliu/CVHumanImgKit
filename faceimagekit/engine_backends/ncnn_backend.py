@@ -57,9 +57,7 @@ class NCNNInfer:
             in_mat = input[0]  # c h w
             np_mat = np.ascontiguousarray(in_mat)
             in_mat = ncnn.Mat(np_mat)  # w,h,c
-            # array = in_mat.numpy(format='f')
-            # assert array.dtype == np.float32
-            # assert (np_mat == array).all()
+            raise NotImplementedError(f"np ndarray convert to ncnn:Mat may be failed!, please input as ncnn::Mat!")
         else:
             raise ValueError(
                 f"input type must be ncnn.Mat or np.ndarray, but got: {type(input)}")

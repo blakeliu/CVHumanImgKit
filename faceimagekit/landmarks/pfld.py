@@ -8,9 +8,14 @@ if not module_available("numba"):
     raise ModuleNotFoundError(
         "numba package not found! please 'pip install numba'")
 from numba import njit
+if not module_available("ncnn"):
+    raise ModuleNotFoundError(
+        "ncnn package not found! please 'pip install ncnn'")
+import ncnn
 import cv2
 from faceimagekit.utils import rersize_points, resize_image
-
+from faceimagekit.engine_backends.ncnn_backend import NCNNInfer
+from faceimagekit.engine_backends.onnx_backend import ONNXInfer
 from .base import Landmarker
 
 
@@ -91,7 +96,12 @@ class PFLD(Landmarker):
         return self._postprocess(self._forward(blobs), scale_imgs, resize_shapes)
 
     def _preprocess(self, img: np.ndarray):
-        blob = normalize_on_np(img)
+        if isinstance(self.session, NCNNInfer):
+            img_h, img_w = img.shape[1: 3]
+            blob = ncnn.Mat.from_pixels(img[0], ncnn.Mat.PixelType.PIXEL_BGR2RGB, img_w, img_h)
+            blob.substract_mean_normalize([0, 0, 0], [1 / 255.0, 1 / 255.0, 1 / 255.0])
+        else:
+            blob = normalize_on_np(img)
         return blob
     
     def _postprocess(self, net_outputs, scale_imgs, resize_shapes):
