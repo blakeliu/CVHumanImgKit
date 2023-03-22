@@ -2,7 +2,7 @@ numba==0.56.4
 onnx>=1.13.0
 onnxruntime>=1.14.0
 onnx-simplifier==0.4.17
-ncnn==1.0.20230223
+ncnn>=1.0.20230223
 opencv-python-headless==4.6.0.66
 opencv-python==4.6.0.66
 gputil
