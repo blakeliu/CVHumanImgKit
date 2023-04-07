@@ -118,10 +118,10 @@
                 "--threshold",
                 "0.4",
                 "-files",
-                "examples/test_images/lumia.jpg",
+                // "examples/test_images/lumia.jpg",
                 "examples/test_images/face.jpg",
-                "--save_path",
-                "lumia-out",
+                // "--save_path",
+                // "lumia-out",
                 "--imshow"
             ]
         },
@@ -136,6 +136,32 @@
                 "PYTHONPATH": "${workspaceRoot}/"
             },
             "args": [
+                "-det_weight",
+                // "weights/scrfd/onnx/scrfd_500m_gnkps.onnx",
+                // "weights/scrfd/onnx/scrfd_2.5g_gnkps.onnx",
+                "weights/scrfd/onnx/scrfd_10g_gnkps.onnx",
+                // "weights/scrfd/ncnn/scrfd_500m_bnkps_shape640x640-opt",
+                // "weights/scrfd/ncnn/scrfd_2.5g_bnkps_shape640x640-opt",
+                // "weights/scrfd/ncnn/scrfd_10g_bnkps_shape640x640-opt",
+                "-ld_weight",
+                // "weights/pfld/onnx/landmark_lapa_134.onnx",
+                "weights/pfld/ncnn/landmark_lapa_134-opt",
+                "-det_engine",
+                "ONNXInfer",
+                // "NCNNInfer",
+                "-ld_engine",
+                // "ONNXInfer",
+                "NCNNInfer",
+                "--det_input_shape",
+                "3",
+                "640",
+                "640",
+                "--ld_input_shape",
+                "3",
+                "112",
+                "112",
+                "--det_threshold",
+                "0.4",
                 "-weight",
                 "weights/ppliteseg/onnx/face_seg_pplitesegt.onnx",
                 // "weights/pfld/ncnn/landmark_lapa_134-opt",
@@ -147,10 +173,28 @@
                 "512",
                 "512",
                 "-files",
-                "examples/test_images/face.jpg",
+                // "examples/test_images/face.jpg",
+                "examples/test_images/situ.jpg",
+                // "examples/test_images/3dpro.png",
                 // "--save_path",
                 // "lumia-out",
                 "--imshow"
+            ]
+        },
+        {
+            "name": "Python: weights/generate_hash.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/weights/generate_hash.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}/"
+            },
+            "args": [
+                "-weights",
+                "weights/pfld/ncnn/landmark_lapa_134-opt.bin",
+                "weights/pfld/onnx/landmark_lapa_134.onnx",
             ]
         },
     ]
