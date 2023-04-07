@@ -213,7 +213,7 @@ class PPLiteSeg(Segmenter):
             res_tensors = np.zeros((c, *new_size[::-1]), dtype=np.uint8)
             for i in range(c):
                 res_tensors[i] = cv2.resize(pad_img[i].astype(
-                    np.uint8), new_size, interpolation=cv2.INTER_LINEAR)
+                    np.uint8), new_size, interpolation=cv2.INTER_NEAREST)
             return np.ascontiguousarray(res_tensors)
         return pad_img.astype(np.uint8)
 
