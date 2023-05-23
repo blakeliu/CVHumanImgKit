@@ -38,7 +38,7 @@ class NCNNInfer:
     # warmup
     def prepare(self, device: str = 'cpu'):
         self._model = ncnn.Net()
-        self._model.set_num_threads(self.num_threads)
+        self._model.opt.set_num_threads(self.num_threads)
         if device == "gpu":
             self._model.opt.use_vulkan_compute = True
         else:
