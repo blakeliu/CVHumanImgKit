@@ -38,6 +38,7 @@ class NCNNInfer:
     # warmup
     def prepare(self, device: str = 'cpu'):
         self._model = ncnn.Net()
+        self._model.set_num_threads(self.num_threads)
         if device == "gpu":
             self._model.opt.use_vulkan_compute = True
         else:
@@ -68,7 +69,6 @@ class NCNNInfer:
         out_puts = {}
         try:
             with self._model.create_extractor() as ex:
-                ex.set_num_threads(self.num_threads)
                 if isinstance(self.input_order, list) or isinstance(self.input_order, tuple):
                     for in_name in self.input_order:
                         ex.input(in_name, in_mat)
