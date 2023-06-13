@@ -22,11 +22,11 @@ def parse_args():
     parser.add_argument('-det_engine', '--det_engine_type', type=str,
                         choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="detection engine type.")
     parser.add_argument('-ld_engine', '--ld_engine_type', type=str,
-                        choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="landmark engine type.")
+                        choices=['MMDeployInfer'], default='MMDeployInfer', help="landmark engine type.")
     parser.add_argument('--det_input_shape', type=int, nargs='+',
                         default=[3, 640, 640], help='detector input shape: c, h, w')
     parser.add_argument('--ld_input_shape', type=int, nargs='+',
-                        default=[3, 112, 112], help='landmarker input shape: c, h, w')
+                        default=[256, 256, 3], help='landmarker input shape: h, w, c')
     parser.add_argument('--threshold', type=float,
                         default=0.5, help='score threshold')
     parser.add_argument('--nms', type=float, default=0.4, help='nms threshold')
@@ -71,7 +71,8 @@ def main():
             if min(show_img.shape[0: 2]) > 1080:
                 h, w = show_img.shape[0: 2]
                 resize = (int(w*0.5), int(h*0.5))
-                resize_img = cv2.resize(img, resize, interpolation=cv2.INTER_AREA)
+                resize_img = cv2.resize(
+                    img, resize, interpolation=cv2.INTER_AREA)
                 cv2.imshow(show_name, resize_img)
             else:
                 cv2.imshow(show_name, show_img)

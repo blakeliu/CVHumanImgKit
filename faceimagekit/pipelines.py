@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 from faceimagekit.utils import draw_face, Timer, resize_image, rersize_points
 from .face_detectors import scrfd_model
-from .face_landmarks import pfld_model
+from .face_landmarks import rtmface_model
 
 
 class _BasePipeline(ABC):
@@ -20,7 +20,7 @@ class _BasePipeline(ABC):
         raise NotImplementedError()
 
 
-EngineType = Union['ONNXInfer', 'NCNNInfer']
+EngineType = Union['ONNXInfer', 'NCNNInfer', 'MMDeployInfer']
 DeviceType = Union['cpu', 'gpu']
 
 
@@ -33,7 +33,7 @@ class FaceLandmarkPipeline(_BasePipeline):
                  det_backend: EngineType,
                  landmark_backend: EngineType,
                  det_input_shape: tuple = (3, 640, 640),
-                 landmark_input_shape: tuple = (3, 112, 112),
+                 landmark_input_shape: tuple = (256, 256, 3),
                  device: DeviceType = 'cpu') -> None:
         """landmark检测pipeline: face detection -> face landmark
 
@@ -43,14 +43,14 @@ class FaceLandmarkPipeline(_BasePipeline):
             det_backend (EngineType): detection backend
             landmark_backend (EngineType): landmark backend
             det_input_shape (tuple, optional): c h w. Defaults to (3, 640, 640).
-            landmark_input_shape (tuple, optional): c h w. Defaults to (3, 112, 112).
+            landmark_input_shape (tuple, optional): h w c. Defaults to (256, 256,3).
             device (DeviceType, optional): 'cpu' or 'gpu'. Defaults to 'cpu'.
         """
         self.det_input_shape = det_input_shape
         self.landmark_input_shape = landmark_input_shape
         self._det_infer = scrfd_model(
             det_weight, det_backend, input_shape=det_input_shape)
-        self._ld_infer = pfld_model(
+        self._ld_infer = rtmface_model(
             landmark_weight, landmark_backend, input_shape=landmark_input_shape)
         self.device = device
 
@@ -58,14 +58,13 @@ class FaceLandmarkPipeline(_BasePipeline):
         self._det_infer.prepare(device=self.device)
         self._ld_infer.prepare(device=self.device)
 
-    def lds_infer(self, img, resize_shapes: list = None):
-        poses_list, kpss_list = self._ld_infer.predict(img, resize_shapes)
+    def lds_infer(self, img, boxes: list = None):
+        kpss_list = self._ld_infer.predict(img, boxes)
         results = []
-        for pose, kps in zip(poses_list, kpss_list):
+        for kps in kpss_list:
             results.append(
                 {
-                    'landmarks': kps,
-                    'pose': pose
+                    'landmarks': kps[:, 0: 2],
                 }
             )
         return results
@@ -132,18 +131,7 @@ class FaceLandmarkPipeline(_BasePipeline):
 
             box_img_info = self.crop_ld_face(img, bbox)
             face_img = box_img_info['face_img']
-            face_h, face_w = face_img.shape[0:2]
-            ld_h, ld_w = self.landmark_input_shape[::-1][0:2]
-            if face_h != ld_h or face_w != ld_w:
-                _factor = min(ld_w / face_w, ld_h / face_h)
-                if _factor <= 1.0:
-                    face_img = cv2.resize(
-                        face_img, (ld_w, ld_h), cv2.INTER_LINEAR)
-                else:
-                    face_img = cv2.resize(
-                        face_img, (ld_w, ld_h), cv2.INTER_CUBIC)
-            lds_info = self.lds_infer(face_img, resize_shapes=[[box_img_info['face_h'], box_img_info['face_w']]])[0]
-
+            lds_info = self.lds_infer(face_img)[0]
             lds_info['landmarks'][:, 0] += box_img_info['face_x_offset']
             lds_info['landmarks'][:, 1] += box_img_info['face_y_offset']
             lds_info['landmarks'] = lds_info['landmarks'].astype(np.int32)
