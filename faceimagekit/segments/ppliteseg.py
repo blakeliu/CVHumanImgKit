@@ -68,38 +68,52 @@ class PPLiteSeg(Segmenter):
                  [185, 126, 86],
                  [167, 235, 42]]
 
-    label_map = {0: 'background',
-                 1: 'skin',
-                 2: 'cheek',
-                 3: 'chin',
-                 4: 'ear',
-                 5: 'helix',
-                 6: 'lobule',
-                 7: 'bottom_lid',
-                 8: 'pupil',
-                 9: 'iris',
-                 10: 'sclera',
-                 11: 'tear_duct',
-                 12: 'top_lid',
-                 13: 'eyebrow',
-                 14: 'forhead',
-                 15: 'frown',
-                 16: 'hair',
-                 17: 'temple',
-                 18: 'jaw',
-                 19: 'beard',
-                 20: 'inferior_lip',
-                 21: 'oral comisure',
-                 22: 'superior_lip',
-                 23: 'teeth',
-                 24: 'neck',
-                 25: 'nose',
-                 26: 'ala_nose',
-                 27: 'bridge',
-                 28: 'nose_tip',
-                 29: 'nostril',
-                 30: 'DU26',
-                 31: 'sideburns'}
+    # label_map = {0: 'background',
+    #              1: 'skin',
+    #              2: 'cheek',
+    #              3: 'chin',
+    #              4: 'ear',
+    #              5: 'helix',
+    #              6: 'lobule',
+    #              7: 'bottom_lid',
+    #              8: 'pupil',
+    #              9: 'iris',
+    #              10: 'sclera',
+    #              11: 'tear_duct',
+    #              12: 'top_lid',
+    #              13: 'eyebrow',
+    #              14: 'forhead',
+    #              15: 'frown',
+    #              16: 'hair',
+    #              17: 'temple',
+    #              18: 'jaw',
+    #              19: 'beard',
+    #              20: 'inferior_lip',
+    #              21: 'oral comisure',
+    #              22: 'superior_lip',
+    #              23: 'teeth',
+    #              24: 'neck',
+    #              25: 'nose',
+    #              26: 'ala_nose',
+    #              27: 'bridge',
+    #              28: 'nose_tip',
+    #              29: 'nostril',
+    #              30: 'DU26',
+    #              31: 'sideburns'}
+    label_map = {
+        0: "background",  # 0.背景
+        1: "skin",  # 1.皮肤
+        2: "eye",  # 2.眼睛
+        3: "pupil",  # 3.瞳孔
+        4: "bottom_lid",  # 4.下眼皮
+        5: "top_lid",  # 5.上眼皮
+        6: "eyebrow",  # 6.眉毛
+        7: "hair",  # 7.头发
+        8: "superior_lip",  # 8上嘴唇
+        9: "teeth",  # 9.牙齿
+        10: "inferior_lip",  # 10.下嘴唇
+        11: "nose",  # 11.鼻子
+    }
 
     def __init__(self, infer_backend, version=1) -> None:
         """PPLitseg

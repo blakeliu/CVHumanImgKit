@@ -23,11 +23,11 @@ def parse_args():
     parser.add_argument('-det_engine', '--det_engine_type', type=str,
                         choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="detection engine type.")
     parser.add_argument('-ld_engine', '--ld_engine_type', type=str,
-                        choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="landmark engine type.")
+                        choices=['MMDeployInfer', ], default='MMDeployInfer', help="landmark engine type.")
     parser.add_argument('--det_input_shape', type=int, nargs='+',
                         default=[3, 640, 640], help='detector input shape: c, h, w')
     parser.add_argument('--ld_input_shape', type=int, nargs='+',
-                        default=[3, 112, 112], help='landmarker input shape: c, h, w')
+                        default=[256, 256, 3], help='landmarker input shape: h, w, c')
     parser.add_argument('--det_threshold', type=float,
                         default=0.5, help='det score threshold')
     parser.add_argument('--det_nms', type=float,
@@ -153,15 +153,15 @@ def main():
                       cropped_box[0]: cropped_box[2]+1] = seg_mask
 
         if args.imshow:
+            seg_color_mask = np.hstack((img, seg_color_mask))
             show_name = osp.basename(fp)
             if min(seg_color_mask.shape[0: 2]) > 1080:
                 h, w = seg_color_mask.shape[0: 2]
                 resize = (int(w*0.5), int(h*0.5))
-                show_mask = cv2.resize(
+                seg_color_mask = cv2.resize(
                     seg_color_mask, resize, interpolation=cv2.INTER_LINEAR)
-                cv2.imshow(show_name, show_mask)
-            else:
-                cv2.imshow(show_name, seg_color_mask)
+
+            cv2.imshow(show_name, seg_color_mask)
             cv2.waitKey(0)
         if args.save_path:
             if not osp.exists(args.save_path):
