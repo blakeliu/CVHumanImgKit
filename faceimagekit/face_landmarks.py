@@ -18,3 +18,12 @@ def pfld_model(model_path: Union[str, Path], backend: str = 'ONNXInfer', **kwarg
             weight_file=model_path, input_shape=input_shape, input_order=input_order, output_order=pfld_outputs, **kwargs)
     model = LANDMARKERS.get('PFLD')(infer_backend=inference_backend)
     return model
+
+def rtmface_model(model_path: Union[str, Path], backend: str = 'MMDeployInfer', **kwargs):
+    if backend == "MMDeployInfer":
+        inference_backend = ENGINE_BACKENDS.get(
+            backend)(weight_file=model_path, **kwargs)
+    else:
+        raise NotImplementedError(f"backend: {backend} not implement!")
+    model = LANDMARKERS.get('RTMFace')(infer_backend=inference_backend)
+    return model
