@@ -1,4 +1,5 @@
 numba==0.56.4
+mmdeploy-runtime==1.1.0
 onnx>=1.13.0
 onnxruntime>=1.14.0
 onnx-simplifier==0.4.17

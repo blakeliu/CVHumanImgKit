@@ -7,7 +7,7 @@ import argparse
 import pathlib
 import numpy as np
 import cv2
-from faceimagekit.face_segmenters import ppliteseg_model
+from faceimagekit.face_segmenters import pplitesegface12_model
 from faceimagekit.pipelines import FaceLandmarkPipeline
 from faceimagekit.utils import draw_face, Timer, resize_image, rersize_points
 
@@ -114,7 +114,7 @@ def main():
     except Exception as e:
         raise RuntimeError(f"FaceLandmarkPipeline infer error: {str(e)}")
 
-    seg_infer = ppliteseg_model(
+    seg_infer = pplitesegface12_model(
         args.weight_path, backend=args.engine_type, input_shape=args.input_shape)
     seg_infer.prepare(device=args.accelerator)
 
@@ -139,7 +139,7 @@ def main():
         face_list.sort(key=lambda x: (
             x["bbox"][2] - x["bbox"][0])*(x["bbox"][3]-x["bbox"][1]), reverse=True)
         face = face_list[0]
-        
+
         # crop image for face seg mask
         cropped_img, cropped_box = head_position(img, face["landmarks"])
 
@@ -150,7 +150,7 @@ def main():
 
         seg_color_mask = np.zeros(img.shape, dtype=np.uint8)
         seg_color_mask[cropped_box[1]: cropped_box[3]+1,
-                      cropped_box[0]: cropped_box[2]+1] = seg_mask
+                       cropped_box[0]: cropped_box[2]+1] = seg_mask
 
         if args.imshow:
             seg_color_mask = np.hstack((img, seg_color_mask))
