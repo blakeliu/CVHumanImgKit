@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-import pkg_resources as pkg
+from typing import List
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
 if not module_available("numba"):
@@ -36,12 +36,12 @@ class RTMFace(Landmarker):
         self.infer_shape = self.input_shape
         
     
-    def predict(self, img, bboxes:list[np.ndarray]=None):
+    def predict(self, img, bboxes:List[np.ndarray]=None):
         """预测lds
 
         Args:
             img (_type_): 单张图像
-            bboxes (list[np.ndarray], optional): [[x1,y1,x2,y2],...]. Defaults to None.
+            bboxes (List[np.ndarray], optional): [[x1,y1,x2,y2],...]. Defaults to None.
         """
         assert img is not None
         if bboxes is not None and len(bboxes) > 1:
