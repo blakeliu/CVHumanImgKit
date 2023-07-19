@@ -7,5 +7,5 @@ onnx-simplifier==0.4.17
 ncnn>=1.0.20230223
 opencv-python-headless
 opencv-python
-opencv-contrib-python=
+opencv-contrib-python
 gputil
