@@ -65,7 +65,7 @@ def main():
             img, score_threshold=args.threshold, nms_threshold=args.nms)
         print(f"FaceLandmarkPipeline infer time: {t_infer.time()} s")
         show_img = draw_face(
-            img, face_list, draw_socre=True, draw_lanamrk=True)
+            img, face_list, draw_socre=True, draw_kps=True, draw_lanamrk=True)
         if args.imshow:
             show_name = osp.basename(fp)
             if min(show_img.shape[0: 2]) > 1080:

@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 
-def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: bool = True, draw_socre: bool = False, draw_lanamrk: bool = False):
+def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: bool = True, draw_socre: bool = False, draw_kps: bool = False, draw_lanamrk: bool = False):
     for face in faces:
         w = None
         if draw_bbox:
@@ -36,10 +36,15 @@ def draw_face(image: np.ndarray, faces: List[Dict[str, np.ndarray]], draw_bbox: 
             for i in range(lms.shape[0]):
                 cv2.circle(image, (lms[i][0], lms[i][1]),
                            1, (0, 0, 255), pt_size)
-            # cv2.circle(image, (lms[1][0], lms[1][1]), 1, (0, 255, 255), pt_size)
-            # cv2.circle(image, (lms[2][0], lms[2][1]), 1, (255, 0, 255), pt_size)
-            # cv2.circle(image, (lms[3][0], lms[3][1]), 1, (0, 255, 0), pt_size)
-            # cv2.circle(image, (lms[4][0], lms[4][1]), 1, (255, 0, 0), pt_size)
+
+        if draw_kps:
+            lms = face["kps"].astype(int)
+            if w is None:
+                w = image.shape[1]
+            pt_size = int(w * 0.01)
+            for i in range(lms.shape[0]):
+                cv2.circle(image, (lms[i][0], lms[i][1]),
+                           1, (255, 0, 0), pt_size)
 
     return image
 

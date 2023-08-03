@@ -141,6 +141,7 @@ class FaceLandmarkPipeline(_BasePipeline):
                 lds_info['landmarks'][:, 1], 0, height - 1)
             lds_info['bbox'] = bbox
             lds_info['prob'] = prob
+            lds_info['kps'] = kps
 
             face_list.append(lds_info)
         return face_list

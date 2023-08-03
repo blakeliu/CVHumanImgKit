@@ -101,7 +101,7 @@
                 "-ld_weight",
                 // "weights/pfld/onnx/landmark_lapa_134.onnx",
                 // "weights/pfld/ncnn/landmark_lapa_134-opt",
-                "D:/cv/face/project/FaceImageKit/weights/rtmface/rtmpose-m-ort-lapa134",
+                "weights/rtmface-s/mmdeploy",
                 "-det_engine",
                 "ONNXInfer",
                 // "NCNNInfer",
@@ -121,7 +121,8 @@
                 "-files",
                 // "examples/test_images/lumia.jpg",
                 // "examples/test_images/face.jpg",
-                "examples/test_images/0abcdd634c044f02503fa8829d455cec.jpg",
+                // "examples/test_images/0abcdd634c044f02503fa8829d455cec.jpg",
+                "examples/test_images/3dpro.png",
                 // "--save_path",
                 // "lumia-out",
                 "--imshow"
@@ -201,8 +202,12 @@
             },
             "args": [
                 "-weights",
-                "weights/pfld/ncnn/landmark_lapa_134-opt.bin",
-                "weights/pfld/onnx/landmark_lapa_134.onnx",
+                // "weights/pfld/ncnn/landmark_lapa_134-opt.bin",
+                // "weights/pfld/onnx/landmark_lapa_134.onnx",
+                "weights/pplitesegt/onnx/face_seg_pplitesegt.onnx",
+                "weights/pplitesegb/onnx/face12_seg_pplitesegb.onnx",
+                "weights/rtmface-m/mmdeploy/end2end.onnx",
+                "weights/rtmface-s/mmdeploy/end2end.onnx",
             ]
         },
         {
