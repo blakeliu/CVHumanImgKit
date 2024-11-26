@@ -1,15 +1,13 @@
-import os
-import sys
 import logging
-import pkg_resources as pkg
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
-if not module_available("numba"):
-    raise ModuleNotFoundError(
-        "numba package not found! please 'pip install numba'")
-from numba import njit
 
+if not module_available("numba"):
+    raise ModuleNotFoundError("numba package not found! please 'pip install numba'")
+from numba import njit
 from .base import Detector
+
+logging.getLogger("numba").setLevel(logging.WARNING)
 
 
 @njit(cache=True)
@@ -48,7 +46,7 @@ def normalize_on_np(input):
     img = img[..., ::-1]
     img = np.transpose(img, (0, 3, 1, 2))
     img = np.subtract(img, 127.5, dtype=np.float32)
-    img = np.multiply(img, 1/128)
+    img = np.multiply(img, 1 / 128)
     return img
 
 
@@ -86,8 +84,18 @@ def single_distance2kps(point, distance, stride):
 
 
 @njit(fastmath=True, cache=True)
-def generate_proposals(score_blob, bbox_blob, kpss_blob, stride, anchors, threshold, score_out, bbox_out, kpss_out,
-                       offset):
+def generate_proposals(
+    score_blob,
+    bbox_blob,
+    kpss_blob,
+    stride,
+    anchors,
+    threshold,
+    score_out,
+    bbox_out,
+    kpss_out,
+    offset,
+):
     """
     Convert distances from anchors to actual coordinates on source image
     and filter proposals by confidence threshold.
@@ -111,18 +119,20 @@ def generate_proposals(score_blob, bbox_blob, kpss_blob, stride, anchors, thresh
     for ix in range(0, anchors.shape[0]):
         if score_blob[ix, 0] > threshold:
             score_out[total] = score_blob[ix]
-            bbox_out[total] = single_distance2bbox(
-                anchors[ix], bbox_blob[ix], stride)
-            kpss_out[total] = single_distance2kps(
-                anchors[ix], kpss_blob[ix], stride)
+            bbox_out[total] = single_distance2bbox(anchors[ix], bbox_blob[ix], stride)
+            kpss_out[total] = single_distance2kps(anchors[ix], kpss_blob[ix], stride)
             total += 1
 
     return score_out, bbox_out, kpss_out, total
 
 
 @njit(fastmath=True, cache=True)
-def filter(bboxes_list: np.ndarray, kpss_list: np.ndarray,
-           scores_list: np.ndarray, nms_threshold: float = 0.4):
+def filter(
+    bboxes_list: np.ndarray,
+    kpss_list: np.ndarray,
+    scores_list: np.ndarray,
+    nms_threshold: float = 0.4,
+):
     """
     Filter postprocessed network outputs with NMS
 
@@ -145,7 +155,7 @@ def filter(bboxes_list: np.ndarray, kpss_list: np.ndarray,
 class SCRFD(Detector):
     def __init__(self, infer_backend, version=1) -> None:
         """
-        Sample and Computation Redistribution for Efficient Face Detection    
+        Sample and Computation Redistribution for Efficient Face Detection
         参考:
         https://github.com/deepinsight/insightface/tree/master/detection/scrfd
         https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ncnn/cv/ncnn_scrfd.h
@@ -183,7 +193,8 @@ class SCRFD(Detector):
         self.infer_shape = self.input_shape
         # compute proposal length
         max_proposal_len = self._get_max_prop_len(
-            self.infer_shape, self._feat_stride_fpn, self._num_anchors)
+            self.infer_shape, self._feat_stride_fpn, self._num_anchors
+        )
         self.score_list = np.zeros((max_proposal_len, 1), dtype=np.float32)
         self.bbox_list = np.zeros((max_proposal_len, 4), dtype=np.float32)
         self.kps_list = np.zeros((max_proposal_len, 10), dtype=np.float32)
@@ -214,12 +225,14 @@ class SCRFD(Detector):
         dets_list = []
         kpss_list = []
         bboxes_by_img, kpss_by_img, scores_by_img = self._postprocess(
-            net_outs, input_height, input_width, score_threshold)
+            net_outs, input_height, input_width, score_threshold
+        )
 
         # nms
         for e in range(self.infer_shape[0]):
             det, kpss = filter(
-                bboxes_by_img[e], kpss_by_img[e], scores_by_img[e], nms_threshold)
+                bboxes_by_img[e], kpss_by_img[e], scores_by_img[e], nms_threshold
+            )
             dets_list.append(det)
             kpss_list.append(kpss)
         return dets_list, kpss_list
@@ -242,13 +255,18 @@ class SCRFD(Detector):
         key = (input_height, input_width)
         if not self.center_cache.get(key):
             self.center_cache[key] = self._build_anchors(
-                input_height, input_width, self._feat_stride_fpn, self._num_anchors)
+                input_height, input_width, self._feat_stride_fpn, self._num_anchors
+            )
         anchor_centers = self.center_cache[key]
-        
-        reshape_net_outputs = [np.expand_dims(out, 0) if len(out.shape) == 2 else out for out in net_outputs ]
-        
+
+        reshape_net_outputs = [
+            np.expand_dims(out, 0) if len(out.shape) == 2 else out
+            for out in net_outputs
+        ]
+
         bboxes, kpss, scores = self._process_strides(
-            reshape_net_outputs, threshold, anchor_centers)
+            reshape_net_outputs, threshold, anchor_centers
+        )
         return bboxes, kpss, scores
 
     @staticmethod
@@ -285,12 +303,14 @@ class SCRFD(Detector):
             height = input_height // stride
             width = input_width // stride
 
-            anchor_centers = np.stack(
-                np.mgrid[:height, :width][::-1], axis=-1).astype(np.float32)
+            anchor_centers = np.stack(np.mgrid[:height, :width][::-1], axis=-1).astype(
+                np.float32
+            )
             anchor_centers = (anchor_centers * stride).reshape((-1, 2))
             if num_anchors > 1:
                 anchor_centers = np.stack(
-                    [anchor_centers] * num_anchors, axis=1).reshape((-1, 2))
+                    [anchor_centers] * num_anchors, axis=1
+                ).reshape((-1, 2))
             centers.append(anchor_centers)
         return centers
 
@@ -317,12 +337,20 @@ class SCRFD(Detector):
                 bbox_blob = net_outs[idx + self.fmc][n_img]
                 kpss_blob = net_outs[idx + self.fmc * 2][n_img]
                 stride_anchors = anchor_centers[idx]
-                self.score_list, self.bbox_list, self.kps_list, total = generate_proposals(score_blob, bbox_blob,
-                                                                                           kpss_blob, stride,
-                                                                                           stride_anchors, threshold,
-                                                                                           self.score_list,
-                                                                                           self.bbox_list,
-                                                                                           self.kps_list, offset)
+                self.score_list, self.bbox_list, self.kps_list, total = (
+                    generate_proposals(
+                        score_blob,
+                        bbox_blob,
+                        kpss_blob,
+                        stride,
+                        stride_anchors,
+                        threshold,
+                        self.score_list,
+                        self.bbox_list,
+                        self.kps_list,
+                        offset,
+                    )
+                )
                 offset = total
 
             bboxes_by_img.append(self.bbox_list[:offset])
@@ -333,5 +361,4 @@ class SCRFD(Detector):
 
 
 def regsiter_scrfd_detector(register: Registry):
-    register(fn=SCRFD, name=SCRFD.__name__,
-             namespace="detectors", type="face_det")
+    register(fn=SCRFD, name=SCRFD.__name__, namespace="detectors", type="face_det")
