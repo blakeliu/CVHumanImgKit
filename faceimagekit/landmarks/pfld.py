@@ -1,13 +1,5 @@
-import os
-import sys
-import logging
-import pkg_resources as pkg
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
-if not module_available("numba"):
-    raise ModuleNotFoundError(
-        "numba package not found! please 'pip install numba'")
-from numba import njit
 if not module_available("ncnn"):
     raise ModuleNotFoundError(
         "ncnn package not found! please 'pip install ncnn'")

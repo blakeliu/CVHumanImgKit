@@ -1,12 +1,6 @@
-import os
-import sys
-import logging
 from typing import List
 import numpy as np
-from faceimagekit.core import Registry, regsiter_fn, module_available
-if not module_available("numba"):
-    raise ModuleNotFoundError(
-        "numba package not found! please 'pip install numba'")
+from faceimagekit.core import Registry
 from .base import Landmarker
 
 class RTMFace(Landmarker):

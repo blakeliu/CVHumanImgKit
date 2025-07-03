@@ -1,16 +1,8 @@
-import os
-import sys
-import logging
-import pkg_resources as pkg
 import numpy as np
-from faceimagekit.core import Registry, regsiter_fn, module_available
-if not module_available("numba"):
-    raise ModuleNotFoundError(
-        "numba package not found! please 'pip install numba'")
-from numba import njit
+from faceimagekit.core import Registry, module_available
 import cv2
 from scipy.special import softmax
-from faceimagekit.utils import rersize_points, rescale_image
+from faceimagekit.utils import rescale_image
 from .base import Segmenter
 
 
