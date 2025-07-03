@@ -27,3 +27,12 @@ def rtmface_model(model_path: Union[str, Path], backend: str = 'MMDeployInfer', 
         raise NotImplementedError(f"backend: {backend} not implement!")
     model = LANDMARKERS.get('RTMFace')(infer_backend=inference_backend)
     return model
+
+def rtmpose_model(model_path: Union[str, Path], backend: str = 'OpencvInfer', **kwargs):
+    if backend == "OpencvInfer":
+        inference_backend = ENGINE_BACKENDS.get(
+            backend)(weight_file=model_path, **kwargs)
+    else:
+        raise NotImplementedError(f"backend: {backend} not implement!")
+    model = LANDMARKERS.get('RTMPose')(infer_backend=inference_backend)
+    return model

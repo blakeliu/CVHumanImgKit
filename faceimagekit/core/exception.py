@@ -5,3 +5,5 @@ class NCNNRunException(Exception):
 
 class ONNXRunException(Exception):
     pass
+class OpencvDNNRunException(Exception):
+    pass
