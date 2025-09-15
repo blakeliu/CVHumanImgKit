@@ -7,37 +7,6 @@ python >= 3.8
 ```shell
 pip install -r requirements.txt
 ```
-## onnxruntime env for mmdeploy
-- Linux-x86_64
-[mmdeploy安装地址](https://github.com/open-mmlab/mmdeploy/blob/main/docs/en/get_started.md)
-```shell
-wget https://github.com/microsoft/onnxruntime/releases/download/v1.8.1/onnxruntime-linux-x64-1.8.1.tgz
-tar -zxvf onnxruntime-linux-x64-1.8.1.tgz
-export ONNXRUNTIME_DIR=$(pwd)/onnxruntime-linux-x64-1.8.1
-export LD_LIBRARY_PATH=$ONNXRUNTIME_DIR/lib:$LD_LIBRARY_PATH
-```
-或者
-
-
-```shell
-wget https://github.com/open-mmlab/mmdeploy/releases/download/v1.1.0/mmdeploy-1.1.0-linux-x86_64.tar.gz
-tar -zxvf mmdeploy-1.1.0-linux-x86_64.tar.gz
-export ONNXRUNTIME_DIR=$(pwd)/mmdeploy-1.1.0-linux-x86_64/thirdparty/onnxruntime/lib
-export LD_LIBRARY_PATH=$ONNXRUNTIME_DIR/lib:$LD_LIBRARY_PATH
-```
-- Win10
-[mmdeploy安装地址](https://github.com/open-mmlab/mmdeploy/blob/main/docs/en/02-how-to-run/prebuilt_package_windows.md)
-
-https://github.com/microsoft/onnxruntime/releases/tag/v1.8.1
-```shell
-wget https://github.com/microsoft/onnxruntime/releases/download/v1.8.1/onnxruntime-win-x64-1.8.1.zip
-```
-或者
-
-```shell
-wget https://github.com/open-mmlab/mmdeploy/releases/download/v1.1.0/mmdeploy-1.1.0-windows-amd64.zip
-```
-设置lib目录到系统环境变量
 
 # Models
 ## Face Dtection
@@ -52,10 +21,11 @@ Models accuracy on WiderFace benchmark:
 来源https://github.com/SthPhoenix/InsightFace-REST/    
 
 **runtime**
-+ [x] onnxruntime(cpu)
++ [x] onnxruntime(cpu, cuda)
 + [x] ncnn
++ [x] opencv
 + [ ] TensorRT
-+ [ ] mmdeploy
+
 
 ## Face Landmark
 datasets: Lapa134(Lapa106 + 28)
@@ -66,7 +36,6 @@ datasets: Lapa134(Lapa106 + 28)
 + [x] onnxruntime(cpu)
 + [x] ncnn
 + [ ] TensorRT
-+ [ ] mmdeploy
 
 ### rtmface
 项目来源 https://blakeliu.coding.net/p/face/d/mmpose/git/tree/master/configs/face_2d_keypoint/rtmpose/lapa
@@ -76,10 +45,10 @@ datasets: Lapa134(Lapa106 + 28)
 |:--------------------|:-------:|
 | rtmpose-m-ort-lapa134  |  0.0288  |
 | rtmpose-s-ort-lapa134  |  0.0258  |
-+ [x] onnxruntime(cpu)
++ [x] onnxruntime(cpu, cuda)
++ [x] opencv
 + [ ] ncnn
 + [ ] TensorRT
-+ [x] mmdeploy
 
 ## Face Segmentation
 ### ppliteseg
@@ -129,7 +98,6 @@ datasets: Lapa134(Lapa106 + 28)
 + [x] onnxruntime(cpu)
 + [x] ncnn
 + [ ] TensorRT
-+ [ ] mmdeploy
 
 - label map 类别数量12
 
@@ -155,4 +123,3 @@ datasets: Lapa134(Lapa106 + 28)
 + [x] onnxruntime(cpu)
 + [x] ncnn
 + [ ] TensorRT
-+ [ ] mmdeploy
