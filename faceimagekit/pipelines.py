@@ -32,7 +32,7 @@ class FaceLandmarkPipeline(_BasePipeline):
         det_backend: EngineType,
         landmark_backend: EngineType,
         det_input_shape: tuple = (3, 640, 640),
-        landmark_input_shape: tuple = (256, 256, 3),
+        landmark_input_shape: tuple = (3, 256, 256),
         device: DeviceType = "cpu",
     ) -> None:
         """landmark检测pipeline: face detection -> face landmark
@@ -43,7 +43,7 @@ class FaceLandmarkPipeline(_BasePipeline):
             det_backend (EngineType): detection backend
             landmark_backend (EngineType): landmark backend
             det_input_shape (tuple, optional): c h w. Defaults to (3, 640, 640).
-            landmark_input_shape (tuple, optional): h w c. Defaults to (256, 256,3).
+            landmark_input_shape (tuple, optional): c h w. Defaults to (3, 256, 256).
             device (DeviceType, optional): 'cpu' or 'gpu'. Defaults to 'cpu'.
         """
         self.det_input_shape = det_input_shape
