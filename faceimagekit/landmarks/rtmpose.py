@@ -225,9 +225,7 @@ def get_simcc_maximum(
 
 
 class RTMPose(Landmarker):
-    def __init__(
-        self, infer_backend, version=1
-    ) -> None:
+    def __init__(self, infer_backend, version=1) -> None:
         """
         https://e.coding.net/blakeliu/face/mmpose.git
         tools/training_lab.ipynb
@@ -240,6 +238,7 @@ class RTMPose(Landmarker):
         super().__init__(infer_backend, version)
         self.version = version
         self.input_shape = self.session.input_shape
+        self.model_input_size = self.input_shape[1:][::-1]  # wh
         self.out_shapes = None
         self.infer_shape = None
         self.mean: tuple = (123.675, 116.28, 103.53)
@@ -274,12 +273,12 @@ class RTMPose(Landmarker):
 
         # do affine transformation
         resized_img, scale = top_down_affine(self.input_shape[1:], scale, center, img)
+        resized_img = np.asarray(resized_img, dtype=np.float32)
         # normalize image
         if self.mean is not None:
             self.mean = np.array(self.mean)
             self.std = np.array(self.std)
             resized_img = (resized_img - self.mean) / self.std
-
         return resized_img, center, scale
 
     def postprocess(
@@ -321,12 +320,17 @@ class RTMPose(Landmarker):
             img (_type_): 单张图像
             bboxes (List[np.ndarray], optional): [[x1,y1,x2,y2],...]. Defaults to None.
         """
-        if len(bboxes) == 0:
+        if bboxes is None or len(bboxes) == 0:
             bboxes = [[0, 0, image.shape[1], image.shape[0]]]
 
         keypoints, scores = [], []
         for bbox in bboxes:
             img, center, scale = self.preprocess(image, bbox)
+
+            img = img.transpose(2, 0, 1)
+            img = np.ascontiguousarray(img, dtype=np.float32)
+            img = img[None, :, :, :]
+
             outputs = self.session.run(img)
             kpts, score = self.postprocess(outputs, center, scale)
             keypoints.append(kpts)

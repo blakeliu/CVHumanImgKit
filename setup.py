@@ -43,7 +43,7 @@ if __name__ == "__main__":
         license="MIT",
 
         description="Python implementation of face detection, face landmark, face segmentation and so on.",
-        long_description = pathlib.Path("README.md").read_text(),
+        long_description = pathlib.Path("README.md").read_text(encoding='utf-8'),
         long_description_content_type = "text/markdown",
         include_package_data=True,
         package_data={

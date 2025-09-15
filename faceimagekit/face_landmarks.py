@@ -1,38 +1,32 @@
-from typing import AnyStr, Optional, Union, Callable
-import os.path as osp
+from typing import Union
 from pathlib import Path
 from .landmarks import LANDMARKERS
 from .engine_backends import ENGINE_BACKENDS
 
 
-pfld_outputs = ['pose', 'lds']
+pfld_outputs = ["pose", "lds"]
 
-def pfld_model(model_path: Union[str, Path], backend: str = 'ONNXInfer', **kwargs):
-    if backend == 'ONNXInfer':
-        inference_backend = ENGINE_BACKENDS.get(
-            backend)(weight_file=model_path, **kwargs)
-    elif backend == 'NCNNInfer':
+
+def pfld_model(model_path: Union[str, Path], backend: str = "ONNXInfer", **kwargs):
+    if backend == "ONNXInfer":
+        inference_backend = ENGINE_BACKENDS.get(backend)(
+            weight_file=model_path, **kwargs
+        )
+    elif backend == "NCNNInfer":
         input_shape = kwargs.pop("input_shape", (3, 112, 112))
         input_order = "input.1"
         inference_backend = ENGINE_BACKENDS.get(backend)(
-            weight_file=model_path, input_shape=input_shape, input_order=input_order, output_order=pfld_outputs, **kwargs)
-    model = LANDMARKERS.get('PFLD')(infer_backend=inference_backend)
+            weight_file=model_path,
+            input_shape=input_shape,
+            input_order=input_order,
+            output_order=pfld_outputs,
+            **kwargs,
+        )
+    model = LANDMARKERS.get("PFLD")(infer_backend=inference_backend)
     return model
 
-def rtmface_model(model_path: Union[str, Path], backend: str = 'MMDeployInfer', **kwargs):
-    if backend == "MMDeployInfer":
-        inference_backend = ENGINE_BACKENDS.get(
-            backend)(weight_file=model_path, **kwargs)
-    else:
-        raise NotImplementedError(f"backend: {backend} not implement!")
-    model = LANDMARKERS.get('RTMFace')(infer_backend=inference_backend)
-    return model
 
-def rtmpose_model(model_path: Union[str, Path], backend: str = 'OpencvInfer', **kwargs):
-    if backend == "OpencvInfer":
-        inference_backend = ENGINE_BACKENDS.get(
-            backend)(weight_file=model_path, **kwargs)
-    else:
-        raise NotImplementedError(f"backend: {backend} not implement!")
-    model = LANDMARKERS.get('RTMPose')(infer_backend=inference_backend)
+def rtmpose_model(model_path: Union[str, Path], backend: str, **kwargs):
+    inference_backend = ENGINE_BACKENDS.get(backend)(weight_file=model_path, **kwargs)
+    model = LANDMARKERS.get("RTMPose")(infer_backend=inference_backend)
     return model

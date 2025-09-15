@@ -22,7 +22,7 @@ def parse_args():
     parser.add_argument('-det_engine', '--det_engine_type', type=str,
                         choices=['ONNXInfer', 'NCNNInfer'], default='ONNXInfer', help="detection engine type.")
     parser.add_argument('-ld_engine', '--ld_engine_type', type=str,
-                        choices=['MMDeployInfer'], default='MMDeployInfer', help="landmark engine type.")
+                        choices=['OpencvInfer'], default='OpencvInfer', help="landmark engine type.")
     parser.add_argument('--det_input_shape', type=int, nargs='+',
                         default=[3, 640, 640], help='detector input shape: c, h, w')
     parser.add_argument('--ld_input_shape', type=int, nargs='+',
