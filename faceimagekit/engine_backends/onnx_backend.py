@@ -19,7 +19,7 @@ import GPUtil
 
 def check_onnxruntime_gpu():
     cuda = True
-    for i, r in enumerate("onnx", "onnxruntime-gpu"):
+    for i, r in enumerate(["onnx", "onnxruntime-gpu"]):
         try:
             pkg.require(r)
         except Exception:
@@ -47,11 +47,17 @@ class ONNXInfer:
 
     # warmup
     def prepare(self, device: str = "cpu"):
-        cuda = (
-            "cuda" in device
-            and check_onnxruntime_gpu()
-            and len(GPUtil.getAvailable(order="first")) > 0
-        )
+        cuda = "cuda" in device and check_onnxruntime_gpu()
+        try:
+            if len(GPUtil.getAvailable(order="first")) > 0:
+                gpu_available = True
+            else:
+                gpu_available = False
+        except Exception as e:
+            logging.warning(f"check GPUtil error: {str(e)}")
+            gpu_available = False
+        cuda = cuda and gpu_available
+
         providers = (
             ["CUDAExecutionProvider", "CPUExecutionProvider"]
             if cuda
@@ -76,8 +82,11 @@ class ONNXInfer:
         logging.info("Warming up ONNX Runtime engine...")
 
         self.out_shapes = [e.shape for e in self._model.get_outputs()]
-
-        self.input_shape = (self.input.shape[0], *self.input_shape)
+        if not isinstance(self.input.shape[0], int):
+            bs = 1
+        else:
+            bs = self.input.shape[0]
+        self.input_shape = (bs, *self.input_shape)
         self.run(np.zeros(self.input_shape, self.input_dtype))
         # self._model.run(self.output_order,
         #                 {self.input.name: np.zeros(self.input_shape, self.input_dtype)})
