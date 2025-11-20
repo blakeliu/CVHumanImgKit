@@ -3,7 +3,7 @@ numpy<2
 scipy
 onnx>=1.13.0
 onnxruntime>=1.14.0
-onnx-simplifier==0.4.17
+onnx-simplifier
 ncnn>=1.0.20230223
 opencv-python-headless
 opencv-python
