@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faceimagekit"
+dynamic = ["version"]
+description = "Python implementation of face detection, face landmark, face segmentation and so on."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "blakeliu", email = "blake120386@163.com"}
+]
+keywords = ["face detection", "face landmark", "cv", "onnx", "onnxruntime", "ncnn"]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Computer Vision",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Computer Vision",
+    "Topic :: Face Analysis :: General",
+]
+dependencies = [
+    "numba",
+    "numpy<2",
+    "scipy",
+    "onnx>=1.13.0",
+    "ncnn>=1.0.20230223",
+    "opencv-python",
+    "gputil",
+]
+
+[project.optional-dependencies]
+cpu = ["onnxruntime>=1.14.0"]
+gpu = ["onnxruntime-gpu>=1.14.0"]
+all = ["onnxruntime>=1.14.0"]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+    "mypy",
+]
+
+[project.urls]
+"Source" = "https://e.coding.net/blakeliu/face/FaceImageKit.git"
+"ncnn" = "https://github.com/Tencent/ncnn"
+"onnxruntime" = "https://github.com/microsoft/onnxruntime"
+
+[tool.setuptools.dynamic]
+version = {attr = "faceimagekit.version.__version__"}
+
+[tool.setuptools]
+packages = ["faceimagekit"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+# Include any data files inside the package
+"faceimagekit" = ["py.typed"] 
+
+[tool.uv]
+# Optional: uv specific settings if needed, but standard standards work best.
