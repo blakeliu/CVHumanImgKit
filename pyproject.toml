@@ -32,7 +32,6 @@ dependencies = [
     "numba",
     "numpy<2",
     "scipy",
-    "onnx>=1.13.0",
     "ncnn>=1.0.20230223",
     "opencv-python",
     "gputil",

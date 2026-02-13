@@ -7,7 +7,6 @@ KEYWORDS = [
     "face detection",
     "face landmark",
     "cv",
-    "onnx",
     "onnxruntime",
     "ncnn"
 ]
