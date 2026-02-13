@@ -1,7 +1,6 @@
 import os.path as osp
 import sys
 import logging
-import pkg_resources as pkg
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
 from faceimagekit.core.exception import OpencvDNNRunException

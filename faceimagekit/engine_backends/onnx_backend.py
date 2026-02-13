@@ -1,7 +1,7 @@
 import os.path as osp
 import sys
 import logging
-import pkg_resources as pkg
+import importlib.util as import_util
 import numpy as np
 from faceimagekit.core import Registry, regsiter_fn, module_available
 from faceimagekit.core.exception import ONNXRunException
@@ -20,9 +20,8 @@ import GPUtil
 def check_onnxruntime_gpu():
     cuda = True
     for i, r in enumerate(["onnx", "onnxruntime-gpu"]):
-        try:
-            pkg.require(r)
-        except Exception:
+        spec = import_util.find_spec(r)
+        if spec is None:
             cuda = False
             print(f"{r} not found and is required by ONNXInfer")
     return cuda

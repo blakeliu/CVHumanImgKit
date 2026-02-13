@@ -5,11 +5,11 @@ import types
 from importlib.util import find_spec
 from typing import List, Union
 
-from pkg_resources import DistributionNotFound
+from importlib.metadata import PackageNotFoundError
 
 try:
     from packaging.version import Version
-except (ModuleNotFoundError, DistributionNotFound):
+except (ModuleNotFoundError, PackageNotFoundError):
     Version = None
 
 
@@ -42,7 +42,7 @@ def compare_version(package: str, op, version) -> bool:
     """
     try:
         pkg = importlib.import_module(package)
-    except (ModuleNotFoundError, DistributionNotFound, ValueError):
+    except (ModuleNotFoundError, PackageNotFoundError, ValueError):
         return False
     try:
         pkg_version = Version(pkg.__version__)
